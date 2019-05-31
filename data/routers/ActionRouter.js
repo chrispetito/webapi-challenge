@@ -66,7 +66,7 @@ async function verifyProjectId(req, res, next) {
     const{ project_id } = req.body
     const action = await projectdb.get(project_id)
     if(!action) {
-        res.status(404).json({ message: 'Invalid User ID'})
+        res.status(404).json({ message: 'Invalid Project ID'})
     } else {
         next();
     }
