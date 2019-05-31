@@ -7,7 +7,7 @@ const router = express.Router();
 //get all projects
 router.get("/", (req, res) => {
   db.get()
-    .then(projects => res.status(201).json(projects))
+    .then(projects => res.status(200).json(projects))
     .catch(err =>
       res
         .status(500)
@@ -19,7 +19,7 @@ router.get("/", (req, res) => {
 router.get("/:id", (req, res) => {
   const { id } = req.params;
   db.get(id)
-    .then(project => res.status(201).json(project))
+    .then(project => res.status(200).json(project))
     .catch(err =>
       res
         .status(500)
@@ -31,7 +31,7 @@ router.get("/:id", (req, res) => {
 router.get("/:id/actions", (req, res) => {
   const { id } = req.params;
   db.getProjectActions(id)
-    .then(actions => res.status(201).json(actions))
+    .then(actions => res.status(200).json(actions))
     .catch(err =>
       res
         .status(500)
@@ -40,18 +40,18 @@ router.get("/:id/actions", (req, res) => {
 });
 
 //add new project
-router.post("/", (req, res) => {
-  db.insert(req.body)
-    .then(project => res.status(201).json(project))
-    .catch(err =>
-      res
-        .status(500)
-        .json({ message: "There was an error adding the project." })
-    );
-});
+router.post("/", validateProject, (req, res) => {
+    db.insert(req.body)
+      .then(project => res.status(201).json(project))
+      .catch(err =>
+        res
+          .status(500)
+          .json({ message: "There was an error adding the project." })
+      );
+  });
 
 //modify project by id
-router.put("/:id", (req, res) => {
+router.put("/:id", validateProject, (req, res) => {
   const { id } = req.params;
   db.update(id, req.body)
     .then(project => res.status(201).json(project))
@@ -67,7 +67,7 @@ router.delete("/:id", (req, res) => {
   const { id } = req.params;
   db.remove(id)
     .then(() =>
-      res.status(201).json({ message: "Project was successfully removed." })
+      res.status(200).json({ message: "Project was successfully removed." })
     )
     .catch(err =>
       res
@@ -77,3 +77,13 @@ router.delete("/:id", (req, res) => {
 });
 
 module.exports = router;
+
+//middleware fn to ensure name and description fields are populated
+function validateProject(req, res, next) {
+    const { name, description } = req.body
+    if (!name || !description) {
+        res.status(404).json({ message: "Name and description fields are required"})
+    } else {
+        next();
+    }
+}

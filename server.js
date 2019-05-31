@@ -7,11 +7,17 @@ const server = express();
 
 server.use(express.json());
 
-server.use('/api/actions', actionRouter)
-server.use('/api/projects', projectRouter)
+server.use('/api/actions', logger, actionRouter)
+server.use('/api/projects', logger,  projectRouter)
 
 server.get('/', (req, res) => {
     res.json({ message: 'Welcome to my Web API Sprint Challenge!'})
 })
+
+//middleware logger
+function logger(req, res, next) {
+    console.log(`A ${req.method} request to ${req.originalUrl} was made at ${Date.now()}`)
+    next();
+}
 
 module.exports = server;

@@ -1,12 +1,13 @@
 const express = require("express");
 const db = require("../helpers/actionModel");
+const projectdb = require('../helpers/projectModel');
 
 const router = express.Router();
 
 //get all actions
 router.get("/", (req, res) => {
   db.get()
-    .then(actions => res.status(201).json(actions))
+    .then(actions => res.status(200).json(actions))
     .catch(err =>
       res
         .status(500)
@@ -15,10 +16,10 @@ router.get("/", (req, res) => {
 });
 
 //get action by id
-router.get("/:id", (req, res) => {
+router.get("/:id", verifyProjectId, (req, res) => {
   const { id } = req.params;
   db.get(id)
-    .then(action => res.status(201).json(action))
+    .then(action => res.status(200).json(action))
     .catch(err =>
       res
         .status(500)
@@ -27,7 +28,7 @@ router.get("/:id", (req, res) => {
 });
 
 //add new action
-router.post("/", (req, res) => {
+router.post("/", validateAction, (req, res) => {
   db.insert(req.body)
     .then(action => res.status(201).json(action))
     .catch(err =>
@@ -36,10 +37,10 @@ router.post("/", (req, res) => {
 });
 
 //modify action by id
-router.put("/:id", (req, res) => {
+router.put("/:id", verifyProjectId, validateAction, (req, res) => {
   const { id } = req.params;
   db.update(id, req.body)
-    .then(action => res.status(201).json(action))
+    .then(action => res.status(200).json(action))
     .catch(err =>
       res
         .status(500)
@@ -60,5 +61,27 @@ router.delete("/:id", (req, res) => {
         .json({ message: "There was an error deleting the action." })
     );
 });
+
+async function verifyProjectId(req, res, next) {
+    const{ id } = req.params
+    const action = await projectdb.get(id)
+    if (action) {
+        req.action = action;
+        next();
+    } else {
+        res.status(400).json({ message: 'Invalid Project ID'})
+    }
+}
+
+function validateAction(req, res, next) {
+    const { description, notes } = req.body;
+    if (!description || !notes) {
+        res.status(404).json({ message: 'Description and notes fields are required'})
+    } else if (description.length > 128) {
+        res.status(404).json({ message: 'Description is too long. Please limit to 128 characters'})
+    } else {
+        next();
+    }
+}
 
 module.exports = router;
