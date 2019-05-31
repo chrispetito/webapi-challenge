@@ -8,12 +8,12 @@ class ProjectBoard extends React.Component {
     }
     render() {
         return(
-            <div>
+            <div className='project-container'>
                 {this.props.projects.map(project => {
                     return(
-                        <div className='ind-project'>
-                        <h1>{project.name}</h1>
-                        <h3>{project.description}</h3>
+                        <div className='ind-project' key={project.id}>
+                        <h1 className={(project.name === '') ? 'project-name-hidden' : 'project-name'}>{project.name}</h1>
+                        <p className={(project.name === '') ? 'project-description-alt' : 'project-description'}>{project.description}</p>
                         </div>
                     )
                 })}
