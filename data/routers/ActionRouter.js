@@ -63,13 +63,12 @@ router.delete("/:id", (req, res) => {
 });
 
 async function verifyProjectId(req, res, next) {
-    const{ id } = req.params
-    const action = await projectdb.get(id)
-    if (action) {
-        req.action = action;
-        next();
+    const{ project_id } = req.body
+    const action = await projectdb.get(project_id)
+    if(!action) {
+        res.status(404).json({ message: 'Invalid User ID'})
     } else {
-        res.status(400).json({ message: 'Invalid Project ID'})
+        next();
     }
 }
 
